@@ -36,7 +36,7 @@ void unlockBalance();
 
 void setup() {
   Serial.begin(9600);
-  sensors.begin();   //Se inicia el sensor
+  sensors.begin();
   Wire.begin();
   pinMode(OUTPUT_1,OUTPUT);
   pinMode(OUTPUT_2,OUTPUT);
@@ -62,31 +62,12 @@ void loop() {
 }
 
 float readPh(){
-  unsigned long int avgValue;  //Store the average value of the sensor feedback
-  float b;
-  int buf[SAMPLE_SIZE];
-  int temp;
-    // put your main code here, to run repeatedly:
-  for(int i=0;i<SAMPLE_SIZE;i++)       //Get 10 sample value from the sensor for smooth the value
+  unsigned long int avgValue = 0;  //Store the average value of the sensor feedback
+  for(int i=0;i<SAMPLE_SIZE;i++)   //Get 10 sample value from the sensor for smooth the value
   { 
-    buf[i]=analogRead(A0);
+    avgValue+=analogRead(A0);
     delay(10);
   }
-  for(int i=0;i< SAMPLE_SIZE - 1;i++)        //sort the analog from small to large
-  {
-    for(int j=i+1;j<SAMPLE_SIZE;j++)
-    {
-      if(buf[i]>buf[j])
-      {
-        temp=buf[i];
-        buf[i]=buf[j];
-        buf[j]=temp;
-      }
-    }
-  }
-  avgValue=0;
-  for(int i=0; i< SAMPLE_SIZE ;i++)                      //take the average value of 6 center sample
-    avgValue+=buf[i];
   float phValue = (float)avgValue*MODULE_VOLTAGE/1024/SAMPLE_SIZE; //convert the analog into millivolt
   phValue = 3.5*phValue;                      //convert the millivolt into pH value
   #ifdef DEBUG
@@ -100,8 +81,8 @@ float readPh(){
 }
 
 float readTemp(){
-  sensors.requestTemperatures();   //Se envía el comando para leer la temperatura
-  float t =  sensors.getTempCByIndex(0); //Se obtiene la temperatura en ºC
+  sensors.requestTemperatures();   
+  float t =  sensors.getTempCByIndex(0);
   #ifdef DEBUG
     Serial.print("[ " + millis());
     Serial.print(" ]");
@@ -137,22 +118,21 @@ bool isPHBalanced(){
 }
 
 void balance(){
-  //Check for a balance in progress and abort
   if (balancing)
     return;
   if(ph > ( PH_TARGET + PH_MAX_UNBALANCE ) ){
-    digitalWrite(OUTPUT_1,ACTIVE);
+    digitalWrite(PH_HIGH_OUTPUT,ACTIVE);
     printStatus();
     delay(PH_BALANCE_ACTION_RUN);
-    digitalWrite(OUTPUT_1,INACTIVE);
+    digitalWrite(PH_HIGH_OUTPUT,INACTIVE);
     balancing = true;
     timer.in(PH_BALANCE_ACTION_INTERVAL * 1000 , unlockBalance);
   }
   if(ph < ( PH_TARGET - PH_MAX_UNBALANCE ) ){
-    digitalWrite(OUTPUT_2,ACTIVE);
+    digitalWrite(PH_LOW_OUTPUT,ACTIVE);
     printStatus();
     delay(PH_BALANCE_ACTION_RUN);
-    digitalWrite(OUTPUT_2,INACTIVE);
+    digitalWrite(PH_LOW_OUTPUT,INACTIVE);
     balancing = true;
     timer.in(PH_BALANCE_ACTION_INTERVAL * 1000 , unlockBalance);
   }

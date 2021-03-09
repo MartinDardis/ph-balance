@@ -11,10 +11,10 @@
 #define LCD_COL 20
 #define TEMP_SENSOR A1
 
-#define OUTPUT_1 46 // PH LOW MOTOR
-#define OUTPUT_2 48 // PH UP  MOTOR
-#define OUTPUT_3 50
-#define OUTPUT_4 52
+#define OUTPUT_1 46 // Relay 1
+#define OUTPUT_2 48 // Relay 2
+#define OUTPUT_3 50 // Relay 3
+#define OUTPUT_4 52 // Relay 4
 
 #define ACTIVE LOW
 #define INACTIVE HIGH
@@ -23,6 +23,9 @@
 #define PH_MAX_UNBALANCE 0.2
 #define PH_BALANCE_ACTION_RUN 500 //MILISECONDS
 #define PH_BALANCE_ACTION_INTERVAL 120 //SECONDS
+#define PH_LOW_OUTPUT OUTPUT_1 // IF ph low activate realy 1
+#define PH_HIGH_OUTPUT OUTPUT_2 // IF ph high activate relay 2
+
 
 #define DEBUG
 #endif
