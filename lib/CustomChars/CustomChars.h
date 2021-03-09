@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-const byte deltaChar[] = {
+byte deltaChar[] = {
   B00100,
   B00100,
   B11111,
