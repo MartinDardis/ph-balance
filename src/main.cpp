@@ -124,7 +124,7 @@ void printStatus(){
 }
 
 bool isPHBalanced(){
-  return  ph > PH_TARGET + PH_MAX_UNBALANCE || ph < PH_TARGET - PH_MAX_UNBALANCE;
+  return  ( ph > PH_TARGET + PH_MAX_UNBALANCE ) || ( ph < PH_TARGET - PH_MAX_UNBALANCE );
 }
 
 void balance(){
