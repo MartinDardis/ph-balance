@@ -6,6 +6,7 @@
 #include <OneWire.h>                
 #include <DallasTemperature.h>
 #include <arduino-timer.h>
+#include <DFRobot_EC.h>
 
 
 /**
@@ -15,10 +16,14 @@
 OneWire ourWire(TEMP_SENSOR);                //Se establece el pin 2  como bus OneWire 
 DallasTemperature sensors(&ourWire); //Se declara una variable u objeto para nuestro sensor
 LiquidCrystal_I2C	lcd(I2C_ADDR,LCD_COL,LCD_ROW);
+DFRobot_EC ec;
+
 auto timer = timer_create_default(); // create a timer with default settings
 float ph = 0.0;
 float temperature = 0.0;
 bool balancing = false;
+float voltage = 0.0;
+float ecValue = 0.0;
 
 /**
  * Funtions declaration
@@ -30,7 +35,7 @@ bool isPHBalanced();
 void printStatus();
 void balance();
 void unlockBalance();
-
+void readEC();
 
 
 
@@ -38,6 +43,7 @@ void setup() {
   Serial.begin(9600);
   sensors.begin();
   Wire.begin();
+  ec.begin();
   pinMode(OUTPUT_1,OUTPUT);
   pinMode(OUTPUT_2,OUTPUT);
   pinMode(OUTPUT_3,OUTPUT);
@@ -55,9 +61,10 @@ void setup() {
 void loop() {
   ph = readPh();
   temperature = readTemp();
-  if ( ! isPHBalanced() );
-    balance();
+  readEC();
   printStatus();
+  if ( ! isPHBalanced() )
+    balance();
   timer.tick();
 }
 
@@ -90,6 +97,7 @@ float readTemp(){
     Serial.print(t);
     Serial.print(" °C\n");
   #endif
+  return t;
 }
 
 void printStatus(){       
@@ -103,13 +111,15 @@ void printStatus(){
   lcd.setCursor(0,1);
   lcd.print("Temp: ");
   lcd.print(temperature);
-  lcd.print("C");
+  lcd.print("C T:");
+  lcd.print(millis()/1000);
   lcd.setCursor(0,2);
+  lcd.print("EC: ");
+  lcd.print(ecValue);
+  lcd.print(" ms/cm");
+  lcd.setCursor(0,3);
   char outputs[100] = {'\0'};
   sprintf(outputs,"OUT_1: %s  OUT_2: %s",digitalRead(OUTPUT_1) ? "NO" : "SI", digitalRead(OUTPUT_2)? "NO" : "SI");
-  lcd.print(outputs);
-  lcd.setCursor(0,3);
-  sprintf(outputs,"OUT_3: %s  OUT_4: %s",digitalRead(OUTPUT_3)? "NO" : "SI", digitalRead(OUTPUT_4)? "NO" : "SI");
   lcd.print(outputs);
 }
 
@@ -127,6 +137,7 @@ void balance(){
     digitalWrite(PH_HIGH_OUTPUT,INACTIVE);
     balancing = true;
     timer.in(PH_BALANCE_ACTION_INTERVAL * 1000 , unlockBalance);
+    return;
   }
   if(ph < ( PH_TARGET - PH_MAX_UNBALANCE ) ){
     digitalWrite(PH_LOW_OUTPUT,ACTIVE);
@@ -135,9 +146,15 @@ void balance(){
     digitalWrite(PH_LOW_OUTPUT,INACTIVE);
     balancing = true;
     timer.in(PH_BALANCE_ACTION_INTERVAL * 1000 , unlockBalance);
+    return;
   }
 }
 
 void unlockBalance(){
   balancing = false;
+}
+
+void readEC(){
+  voltage = analogRead(EC_SENSOR)/1024.0*5000;   // read the voltage
+  ecValue =  ec.readEC(voltage,temperature);  // convert voltage to EC with temperature compensation
 }

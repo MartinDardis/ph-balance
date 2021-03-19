@@ -9,12 +9,15 @@
 #define I2C_ADDR    0x3F  // Define I2C Address where the SainSmart LCD is
 #define LCD_ROW 4
 #define LCD_COL 20
-#define TEMP_SENSOR A1
 
-#define OUTPUT_1 46 // Relay 1
-#define OUTPUT_2 48 // Relay 2
-#define OUTPUT_3 50 // Relay 3
-#define OUTPUT_4 52 // Relay 4
+#define PH_SENSOR A0
+#define EC_SENSOR A1
+#define TEMP_SENSOR 3
+
+#define OUTPUT_1 50 // Relay 1
+#define OUTPUT_2 51 // Relay 2
+#define OUTPUT_3 52 // Relay 3
+#define OUTPUT_4 53 // Relay 4
 
 #define ACTIVE LOW
 #define INACTIVE HIGH
