@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+#define VERSION "2.0.0"
 
 #define SAMPLE_SIZE 100
 #define MODULE_VOLTAGE 5 

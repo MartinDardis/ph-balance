@@ -53,7 +53,9 @@ void setup() {
   digitalWrite(OUTPUT_3,INACTIVE);
   digitalWrite(OUTPUT_4,INACTIVE);
   lcd.init();  
-  lcd.print("Inicializando ...");
+  lcd.println("Inicializando ...");
+  lcd.print("VERSION: ");
+  lcd.println(VERSION);
   lcd.backlight();
   lcd.createChar(0,deltaChar);
 }
