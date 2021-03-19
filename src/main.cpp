@@ -35,7 +35,7 @@ bool isPHBalanced();
 void printStatus();
 void balance();
 void unlockBalance();
-void readEC();
+float readEC();
 
 
 
@@ -61,7 +61,7 @@ void setup() {
 void loop() {
   ph = readPh();
   temperature = readTemp();
-  readEC();
+  ecValue = readEC();
   printStatus();
   if ( ! isPHBalanced() )
     balance();
@@ -132,7 +132,6 @@ void balance(){
     return;
   if(ph > ( PH_TARGET + PH_MAX_UNBALANCE ) ){
     digitalWrite(PH_HIGH_OUTPUT,ACTIVE);
-    printStatus();
     delay(PH_BALANCE_ACTION_RUN);
     digitalWrite(PH_HIGH_OUTPUT,INACTIVE);
     balancing = true;
@@ -141,7 +140,6 @@ void balance(){
   }
   if(ph < ( PH_TARGET - PH_MAX_UNBALANCE ) ){
     digitalWrite(PH_LOW_OUTPUT,ACTIVE);
-    printStatus();
     delay(PH_BALANCE_ACTION_RUN);
     digitalWrite(PH_LOW_OUTPUT,INACTIVE);
     balancing = true;
@@ -156,5 +154,13 @@ void unlockBalance(){
 
 void readEC(){
   voltage = analogRead(EC_SENSOR)/1024.0*5000;   // read the voltage
-  ecValue =  ec.readEC(voltage,temperature);  // convert voltage to EC with temperature compensation
+  float ec =  ec.readEC(voltage,temperature);  // convert voltage to EC with temperature compensation
+  #ifdef DEBUG
+    Serial.print("[ " + millis());
+    Serial.print(" ]");
+    Serial.print("EC: ");
+    Serial.print(ec);
+    Serial.print("\n");
+   #endif
+  return ec;
 }
