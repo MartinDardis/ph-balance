@@ -34,7 +34,7 @@ float readTemp();
 bool isPHBalanced();
 void printStatus();
 void balance();
-void unlockBalance();
+bool unlockBalance(void* param);
 float readEC();
 
 
@@ -53,9 +53,9 @@ void setup() {
   digitalWrite(OUTPUT_3,INACTIVE);
   digitalWrite(OUTPUT_4,INACTIVE);
   lcd.init();  
+  lcd.print("Inicializando ...");
   lcd.backlight();
   lcd.createChar(0,deltaChar);
-  lcd.print("Inicializando ...");
 }
 
 void loop() {
@@ -130,12 +130,13 @@ bool isPHBalanced(){
 void balance(){
   if (balancing)
     return;
+  unsigned long timeout = PH_BALANCE_ACTION_INTERVAL * 1000;
   if(ph > ( PH_TARGET + PH_MAX_UNBALANCE ) ){
     digitalWrite(PH_HIGH_OUTPUT,ACTIVE);
     delay(PH_BALANCE_ACTION_RUN);
     digitalWrite(PH_HIGH_OUTPUT,INACTIVE);
     balancing = true;
-    timer.in(PH_BALANCE_ACTION_INTERVAL * 1000 , unlockBalance);
+    timer.in(timeout , unlockBalance);
     return;
   }
   if(ph < ( PH_TARGET - PH_MAX_UNBALANCE ) ){
@@ -143,24 +144,25 @@ void balance(){
     delay(PH_BALANCE_ACTION_RUN);
     digitalWrite(PH_LOW_OUTPUT,INACTIVE);
     balancing = true;
-    timer.in(PH_BALANCE_ACTION_INTERVAL * 1000 , unlockBalance);
+    timer.in(timeout , unlockBalance);
     return;
   }
 }
 
-void unlockBalance(){
+bool unlockBalance(void* param){
   balancing = false;
+  return true;
 }
 
-void readEC(){
+float readEC(){
   voltage = analogRead(EC_SENSOR)/1024.0*5000;   // read the voltage
-  float ec =  ec.readEC(voltage,temperature);  // convert voltage to EC with temperature compensation
+  float ecReaded =  ec.readEC(voltage,temperature);  // convert voltage to EC with temperature compensation
   #ifdef DEBUG
     Serial.print("[ " + millis());
     Serial.print(" ]");
     Serial.print("EC: ");
-    Serial.print(ec);
+    Serial.print(ecReaded);
     Serial.print("\n");
    #endif
-  return ec;
+  return ecReaded;
 }
